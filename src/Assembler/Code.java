@@ -3,7 +3,7 @@ package Assembler;
 import java.util.Map;
 import static java.util.Map.entry;
 
-public class Code {
+class Code {
     private static final Map<String, String> destTable = Map.ofEntries(
             entry("M", "001"),
             entry("D", "010"),
@@ -56,7 +56,7 @@ public class Code {
             entry("JMP", "111")
     );
 
-    public static String dest(String s) {
+    static String dest(String s) {
         if (s == null) {
             return "000";
         }
@@ -64,11 +64,11 @@ public class Code {
         return destTable.get(s);
     }
 
-    public static String comp(String s) {
+    static String comp(String s) {
         return compTable.get(s);
     }
 
-    public static String jump(String s) {
+    static String jump(String s) {
         if (s == null) {
             return "000";
         }

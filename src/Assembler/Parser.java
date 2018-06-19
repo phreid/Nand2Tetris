@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Parser {
+class Parser {
     private int c;
     private ArrayList<String> commands;
     private String curCmd;
@@ -14,44 +14,41 @@ public class Parser {
     static final int C_COMMAND = 1;
     static final int L_COMMAND = -1;
 
-    public Parser(String filepath) {
+    Parser(String filepath) throws IOException {
         commands = new ArrayList<>();
         c = 0;
 
         File file = new File(filepath);
-        Scanner scanner = null;
-        try {
-            scanner = new Scanner(file);
+        Scanner scanner;
 
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                line = line.replace(" ", "");
-                int i = line.indexOf("/");
-                if (i != -1) line = line.substring(0, i);
-                if (! line.isEmpty()) commands.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (scanner != null) scanner.close();
+        scanner = new Scanner(file);
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            line = line.replace(" ", "");
+            int i = line.indexOf("/");
+            if (i != -1) line = line.substring(0, i);
+            if (! line.isEmpty()) commands.add(line);
         }
+
+        scanner.close();
     }
 
-    public boolean hasMoreCommands() {
+    boolean hasMoreCommands() {
         return c < commands.size();
     }
 
-    public void advance() {
+    void advance() {
         curCmd = commands.get(c);
         c++;
     }
 
-    public void reset() {
+    void reset() {
         c = 0;
         curCmd = null;
     }
 
-    public int commandType() {
+    int commandType() {
         char firstChar = curCmd.charAt(0);
 
         if (firstChar == '@') return A_COMMAND;
@@ -59,7 +56,7 @@ public class Parser {
         else return C_COMMAND;
     }
 
-    public String symbol() {
+    String symbol() {
         if (commandType() == A_COMMAND) {
             return curCmd.substring(1, curCmd.length());
         }
@@ -67,7 +64,7 @@ public class Parser {
         return curCmd.substring(1, curCmd.length() - 1);
     }
 
-    public String dest() {
+    String dest() {
         int i = curCmd.indexOf('=');
         if (i != -1) {
             return curCmd.substring(0, i);
@@ -76,41 +73,27 @@ public class Parser {
         return null;
     }
 
-    public String comp() {
+    String comp() {
         int i = curCmd.indexOf('=');
         int j = curCmd.indexOf(';');
 
-        if (i != -1 & j != -1) {
+        if (i != -1 && j != -1) {
             return curCmd.substring(i, j);
-        } else if (i == -1 & j != -1) {
+        } else if (i == -1 && j != -1) {
             return curCmd.substring(0, j);
-        } else if (i != -1 & j == -1) {
+        } else if (i != -1 && j == -1) {
             return curCmd.substring(i + 1, curCmd.length());
         } else {
             return curCmd;
         }
     }
 
-    public String jump() {
+    String jump() {
         int i = curCmd.indexOf(';');
         if (i != -1) {
             return curCmd.substring(i + 1);
         }
 
         return null;
-    }
-
-    public static void main(String[] args) {
-        Parser p = new Parser("test.asm");
-
-        String c = p.commands.toString();
-        System.out.println(c);
-
-        while (p.hasMoreCommands()) {
-            p.advance();
-            if (p.commandType() == C_COMMAND) {
-                System.out.println(p.jump());
-            }
-        }
     }
 }
