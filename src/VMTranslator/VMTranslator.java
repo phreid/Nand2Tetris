@@ -31,8 +31,9 @@ public class VMTranslator {
     }
 
     public static void main(String[] args) throws IOException {
-        String file = "test.vm";
+        String inFile = args[0];
+        //String inFile = "test.vm";
 
-        VMTranslator.translate(file);
+        VMTranslator.translate(inFile);
     }
 }

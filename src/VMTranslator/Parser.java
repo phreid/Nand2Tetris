@@ -8,7 +8,6 @@ import java.util.Scanner;
 class Parser {
     private int c;
     private ArrayList<String> commands;
-    private String curCmd;
     private String[] curCmdArr;
 
     static final int C_ARITHMETIC = 1;
@@ -27,9 +26,6 @@ class Parser {
 
     static final String PUSH = "push";
     static final String POP = "pop";
-
-    static final String CONSTANT = "constant";
-
 
     Parser(String filepath) throws IOException {
         commands = new ArrayList<>();
@@ -57,7 +53,7 @@ class Parser {
     }
 
     void advance() {
-        curCmd = commands.get(c);
+        String curCmd = commands.get(c);
 
         String[] args = curCmd.split(" ");
         for (int i = 0; i < args.length; i++) {
@@ -99,17 +95,5 @@ class Parser {
 
     int arg2() {
         return Integer.parseInt(curCmdArr[2]);
-    }
-
-    public static void main(String args[]) throws IOException {
-        Parser p = new Parser("test.vm");
-        System.out.println(p.commands.size());
-        while (p.hasMoreCommands()) {
-            p.advance();
-            System.out.println(p.curCmd);
-            System.out.println(p.commandType());
-            System.out.println(p.arg1());
-
-        }
     }
 }
