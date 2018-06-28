@@ -43,62 +43,31 @@ class CodeWriter {
     void writeArithmetic(String command) {
         switch (command) {
             case Parser.ADD:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("D=M");
-                writer.println("A=A-1");
-                writer.println("M=D+M");
-                writer.println("@SP");
-                writer.println("M=M-1");
+                writeTwoArgFn("D+M");
                 break;
             case Parser.SUB:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("D=M");
-                writer.println("A=A-1");
-                writer.println("M=M-D");
-                writer.println("@SP");
-                writer.println("M=M-1");
+                writeTwoArgFn("M-D");
                 break;
             case Parser.NEG:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("M=-M");
+                writeOneArgFn("-M");
                 break;
             case Parser.EQ:
                 writeCompare("JNE");
-                labelCounter++;
                 break;
             case Parser.GT:
                 writeCompare("JGE");
-                labelCounter++;
                 break;
             case Parser.LT:
                 writeCompare("JLE");
-                labelCounter++;
                 break;
             case Parser.NOT:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("M=!M");
+                writeOneArgFn("!M");
                 break;
             case Parser.AND:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("D=M");
-                writer.println("A=A-1");
-                writer.println("M=D&M");
-                writer.println("@SP");
-                writer.println("M=M-1");
+                writeTwoArgFn("D&M");
                 break;
             case Parser.OR:
-                writer.println("@SP");
-                writer.println("A=M-1");
-                writer.println("D=M");
-                writer.println("A=A-1");
-                writer.println("M=D|M");
-                writer.println("@SP");
-                writer.println("M=M-1");
+                writeTwoArgFn("D|M");
                 break;
         }
     }
@@ -113,29 +82,29 @@ class CodeWriter {
         writer.println("M=M-1");
     }
 
+    private void writeOneArgFn(String comp) {
+        writer.println("@SP");
+        writer.println("A=M-1");
+        writer.println("M=" + comp);
+    }
+
     private void writeCompare(String condition) {
         writer.println("@SP");
-        writer.println("M=M-1");
-        writer.println("A=M");
+        writer.println("AM=M-1");
         writer.println("D=M");
-        writer.println("@SP");
-        writer.println("M=M-1");
-        writer.println("A=M");
+        writer.println("A=A-1");
         writer.println("D=D-M");
-        writer.println("@FALSE" + "$" + labelCounter);
-        writer.println("D;" + condition);
-        writer.println("@SP");
-        writer.println("A=M");
         writer.println("M=-1");
-        writer.println("@INC" + "$" + labelCounter);
+        writer.println("@FALSE$" + labelCounter);
+        writer.println("D;" + condition);
+        writer.println("@END$" + labelCounter);
         writer.println("0;JMP");
-        writer.println("(FALSE" + "$" + labelCounter + ")");
+        writer.println("(FALSE$" + labelCounter + ")");
         writer.println("@SP");
-        writer.println("A=M");
+        writer.println("A=M-1");
         writer.println("M=0");
-        writer.println("(INC" + "$" + labelCounter + ")");
-        writer.println("@SP");
-        writer.println("M=M+1");
+        writer.println("(END$" + labelCounter + ")");
+        labelCounter++;
     }
 
     void writePushPop(int command, String segment, int index) {
