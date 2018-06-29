@@ -21,6 +21,13 @@ class CodeWriter {
     CodeWriter(String filePath) throws IOException {
         labelCounter = 0;
         setFileName(filePath);
+
+        writer.println("@$BEGIN");
+        writer.println("0;JMP");
+        writeEqSub();
+        writeGtSub();
+        writeLtSub();
+        writer.println("($BEGIN)");
     }
 
     void setFileName(String filePath) throws IOException {
@@ -52,13 +59,28 @@ class CodeWriter {
                 writeOneArgFn("-M");
                 break;
             case Parser.EQ:
-                writeCompare("JNE");
+                writer.println("@$RIP" + labelCounter);
+                writer.println("D=A");
+                writer.println("@$EQ");
+                writer.println("0;JMP");
+                writer.println("($RIP" + labelCounter + ")");
+                labelCounter++;
                 break;
             case Parser.GT:
-                writeCompare("JGE");
+                writer.println("@$RIP" + labelCounter);
+                writer.println("D=A");
+                writer.println("@$GT");
+                writer.println("0;JMP");
+                writer.println("($RIP" + labelCounter + ")");
+                labelCounter++;
                 break;
             case Parser.LT:
-                writeCompare("JLE");
+                writer.println("@$RIP" + labelCounter);
+                writer.println("D=A");
+                writer.println("@$LT");
+                writer.println("0;JMP");
+                writer.println("($RIP" + labelCounter + ")");
+                labelCounter++;
                 break;
             case Parser.NOT:
                 writeOneArgFn("!M");
@@ -86,23 +108,76 @@ class CodeWriter {
         writer.println("M=" + comp);
     }
 
-    private void writeCompare(String condition) {
+    private void writeEqSub() {
+        writer.println("($EQ)");
+        writer.println("@R13");
+        writer.println("M=D");
         writer.println("@SP");
         writer.println("AM=M-1");
         writer.println("D=M");
         writer.println("A=A-1");
         writer.println("D=D-M");
         writer.println("M=-1");
-        writer.println("@FALSE$" + labelCounter);
-        writer.println("D;" + condition);
-        writer.println("@END$" + labelCounter);
+        writer.println("@$FALSE_EQ");
+        writer.println("D;JNE");
+        writer.println("@END$");
         writer.println("0;JMP");
-        writer.println("(FALSE$" + labelCounter + ")");
+        writer.println("($FALSE_EQ)");
         writer.println("@SP");
         writer.println("A=M-1");
         writer.println("M=0");
-        writer.println("(END$" + labelCounter + ")");
-        labelCounter++;
+        writer.println("($END_EQ)");
+        writer.println("@R13");
+        writer.println("A=M");
+        writer.println("0;JMP");
+    }
+
+    private void writeGtSub() {
+        writer.println("($GT)");
+        writer.println("@R13");
+        writer.println("M=D");
+        writer.println("@SP");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("A=A-1");
+        writer.println("D=D-M");
+        writer.println("M=-1");
+        writer.println("@$FALSE_GT");
+        writer.println("D;JGE");
+        writer.println("@END$");
+        writer.println("0;JMP");
+        writer.println("($FALSE_GT)");
+        writer.println("@SP");
+        writer.println("A=M-1");
+        writer.println("M=0");
+        writer.println("($END_GT)");
+        writer.println("@R13");
+        writer.println("A=M");
+        writer.println("0;JMP");
+    }
+
+    private void writeLtSub() {
+        writer.println("($LT)");
+        writer.println("@R13");
+        writer.println("M=D");
+        writer.println("@SP");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("A=A-1");
+        writer.println("D=D-M");
+        writer.println("M=-1");
+        writer.println("@$FALSE_LT");
+        writer.println("D;JLE");
+        writer.println("@END$");
+        writer.println("0;JMP");
+        writer.println("($FALSE_LT)");
+        writer.println("@SP");
+        writer.println("A=M-1");
+        writer.println("M=0");
+        writer.println("($END_LT)");
+        writer.println("@R13");
+        writer.println("A=M");
+        writer.println("0;JMP");
     }
 
     void writePushPop(int command, String segment, int index) {
