@@ -74,12 +74,10 @@ class CodeWriter {
 
     private void writeTwoArgFn(String comp) {
         writer.println("@SP");
-        writer.println("A=M-1");
+        writer.println("AM=M-1");
         writer.println("D=M");
         writer.println("A=A-1");
         writer.println("M=" + comp);
-        writer.println("@SP");
-        writer.println("M=M-1");
     }
 
     private void writeOneArgFn(String comp) {
@@ -114,10 +112,9 @@ class CodeWriter {
                     writer.println("@" + index);
                     writer.println("D=A");
                     writer.println("@SP");
-                    writer.println("A=M");
+                    writer.println("AM=M+1");
+                    writer.println("A=A-1");
                     writer.println("M=D");
-                    writer.println("@SP");
-                    writer.println("M=M+1");
                     break;
                 case LOCAL:
                     writePush("LCL", index);
@@ -135,28 +132,25 @@ class CodeWriter {
                     writer.println("@" + (3 + index));
                     writer.println("D=M");
                     writer.println("@SP");
-                    writer.println("A=M");
+                    writer.println("AM=M+1");
+                    writer.println("A=A-1");
                     writer.println("M=D");
-                    writer.println("@SP");
-                    writer.println("M=M+1");
                     break;
                 case TEMP:
                     writer.println("@" + (5 + index));
                     writer.println("D=M");
                     writer.println("@SP");
-                    writer.println("A=M");
+                    writer.println("AM=M+1");
+                    writer.println("A=A-1");
                     writer.println("M=D");
-                    writer.println("@SP");
-                    writer.println("M=M+1");
                     break;
                 case STATIC:
                     writer.println("@" + staticPrefix + "." + index);
                     writer.println("D=M");
                     writer.println("@SP");
-                    writer.println("A=M");
+                    writer.println("AM=M+1");
+                    writer.println("A=A-1");
                     writer.println("M=D");
-                    writer.println("@SP");
-                    writer.println("M=M+1");
                     break;
             }
         } else if (command == Parser.C_POP) {
@@ -206,10 +200,9 @@ class CodeWriter {
         writer.println("A=D+M");
         writer.println("D=M");
         writer.println("@SP");
-        writer.println("A=M");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
         writer.println("M=D");
-        writer.println("@SP");
-        writer.println("M=M+1");
     }
 
     private void writePop(String segment, int index) {
