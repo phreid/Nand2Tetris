@@ -18,9 +18,9 @@ class CodeWriter {
     private static final String TEMP = "temp";
     private static final String STATIC = "static";
 
-    CodeWriter(String filePath) throws IOException {
+    CodeWriter(File outFile) throws IOException {
         labelCounter = 0;
-        setFileName(filePath);
+        writer = new PrintWriter(outFile);
 
         writer.println("@$BEGIN");
         writer.println("0;JMP");
@@ -30,21 +30,16 @@ class CodeWriter {
         writer.println("($BEGIN)");
     }
 
-    void setFileName(String filePath) throws IOException {
-        File f = new File(filePath);
-        if (f.exists()) f.delete();
-
-        int i = filePath.indexOf('.');
-        int j = filePath.lastIndexOf('\\');
+    void setFileName(String inFile) {
+        int i = inFile.indexOf('.');
+        int j = inFile.lastIndexOf('\\');
         if (i == -1) {
-            staticPrefix = filePath;
+            staticPrefix = inFile;
         } else {
-            staticPrefix = filePath.substring(0, i);
+            staticPrefix = inFile.substring(0, i);
         } if (j != -1) {
             staticPrefix = staticPrefix.substring(j + 1, staticPrefix.length());
         }
-
-        writer = new PrintWriter(f);
     }
 
     void writeArithmetic(String command) {
