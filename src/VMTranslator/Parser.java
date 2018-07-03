@@ -24,8 +24,8 @@ class Parser {
     static final String OR = "or";
     static final String NOT = "not";
 
-    static final String PUSH = "push";
-    static final String POP = "pop";
+    private static final String PUSH = "push";
+    private static final String POP = "pop";
 
     Parser(File inFile) throws IOException {
         commands = new ArrayList<>();
