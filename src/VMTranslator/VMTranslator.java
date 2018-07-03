@@ -7,29 +7,34 @@ import java.util.ArrayList;
 public class VMTranslator {
     public static void translate(String filePath) throws IOException {
         String outPath = filePath;
+        File inFile = new File(filePath);
         ArrayList<String> toTranslate = new ArrayList<>();
 
         if (filePath.endsWith(".vm")) {
             outPath = outPath.replace(".vm", ".asm");
-            toTranslate.add(filePath);
+            if (inFile.exists()) {
+                toTranslate.add(filePath);
+            }
         } else {
-            outPath = outPath.concat(".asm");
-
-            File inFolder = new File(filePath);
-            File[] inFiles = inFolder.listFiles((dir, name) ->
+            outPath += ".asm";
+            File[] inFiles = inFile.listFiles((dir, name) ->
                     name.endsWith(".vm"));
             for (File f : inFiles) {
-                toTranslate.add(f.getAbsolutePath());
+                toTranslate.add(f.getPath());
             }
+        }
+
+        if (toTranslate.isEmpty()) {
+            throw new IOException("No .vm files found.");
         }
 
         File outFile = new File(outPath);
         if (outFile.exists()) outFile.delete();
         CodeWriter cw = new CodeWriter(outFile);
 
-        for (String inFile : toTranslate) {
-            Parser p = new Parser(inFile);
-            cw.setFileName(inFile);
+        for (String inFilePath : toTranslate) {
+            Parser p = new Parser(inFilePath);
+            cw.setFileName(inFilePath);
 
             while (p.hasMoreCommands()) {
                 p.advance();
@@ -48,7 +53,7 @@ public class VMTranslator {
 
     public static void main(String[] args) throws IOException {
         //String inFile = args[0];
-        String inFile = "xyz.vm";
+        String inFile = "07";
 
         VMTranslator.translate(inFile);
     }
