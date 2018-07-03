@@ -30,16 +30,8 @@ class CodeWriter {
         writer.println("($BEGIN)");
     }
 
-    void setFileName(String inFile) {
-        int i = inFile.indexOf('.');
-        int j = inFile.lastIndexOf('\\');
-        if (i == -1) {
-            staticPrefix = inFile;
-        } else {
-            staticPrefix = inFile.substring(0, i);
-        } if (j != -1) {
-            staticPrefix = staticPrefix.substring(j + 1, staticPrefix.length());
-        }
+    void setFileName(String inFileName) {
+        staticPrefix = inFileName.substring(0, inFileName.indexOf('.'));
     }
 
     void writeArithmetic(String command) {

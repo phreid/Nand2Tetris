@@ -27,15 +27,12 @@ class Parser {
     static final String PUSH = "push";
     static final String POP = "pop";
 
-    Parser(String filepath) throws IOException {
+    Parser(File inFile) throws IOException {
         commands = new ArrayList<>();
         c = 0;
         curCmdArr = new String[3];
 
-        File file = new File(filepath);
-        Scanner scanner;
-
-        scanner = new Scanner(file);
+        Scanner scanner = new Scanner(inFile);
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
