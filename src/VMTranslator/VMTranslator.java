@@ -44,6 +44,18 @@ public class VMTranslator {
                 } else if (p.commandType() == Parser.C_PUSH ||
                         p.commandType() == Parser.C_POP) {
                     cw.writePushPop(p.commandType(), p.arg1(), p.arg2());
+                } else if (p.commandType() == Parser.C_LABEL) {
+                    cw.writeLabel(p.arg1());
+                } else if (p.commandType() == Parser.C_GOTO) {
+                    cw.writeGoto(p.arg1());
+                } else if (p.commandType() == Parser.C_IF) {
+                    cw.writeIf(p.arg1());
+                } else if (p.commandType() == Parser.C_FUN) {
+                    cw.writeFunction(p.arg1(), p.arg2());
+                } else if (p.commandType() == Parser.C_RETURN) {
+                    cw.writeReturn();
+                } else if (p.commandType() == Parser.C_CALL) {
+                    cw.writeCall(p.arg1(), p.arg2());
                 }
             }
         }
@@ -52,9 +64,7 @@ public class VMTranslator {
     }
 
     public static void main(String[] args) throws IOException {
-        //String inFile = args[0];
-        String inFile = "test.anv";
-
+        String inFile = args[0];
         VMTranslator.translate(inFile);
     }
 }

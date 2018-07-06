@@ -7,7 +7,9 @@ import java.io.PrintWriter;
 class CodeWriter {
     private PrintWriter writer;
     private int labelCounter;
+    private int returnCounter;
     private String staticPrefix;
+    private String currentFunName;
 
     private static final String CONSTANT = "constant";
     private static final String LOCAL = "local";
@@ -21,13 +23,15 @@ class CodeWriter {
     CodeWriter(File outFile) throws IOException {
         labelCounter = 0;
         writer = new PrintWriter(outFile);
+        currentFunName = "";
 
-        writer.println("@$BEGIN");
+        writer.println("@$INIT");
         writer.println("0;JMP");
         writeEqSub();
         writeGtSub();
         writeLtSub();
-        writer.println("($BEGIN)");
+        writer.println("($INIT)");
+        writeBootstrap();
     }
 
     void setFileName(String inFileName) {
@@ -107,7 +111,7 @@ class CodeWriter {
         writer.println("M=-1");
         writer.println("@$FALSE_EQ");
         writer.println("D;JNE");
-        writer.println("@END$");
+        writer.println("@$END_EQ");
         writer.println("0;JMP");
         writer.println("($FALSE_EQ)");
         writer.println("@SP");
@@ -131,7 +135,7 @@ class CodeWriter {
         writer.println("M=-1");
         writer.println("@$FALSE_GT");
         writer.println("D;JGE");
-        writer.println("@END$");
+        writer.println("@$END_GT");
         writer.println("0;JMP");
         writer.println("($FALSE_GT)");
         writer.println("@SP");
@@ -155,7 +159,7 @@ class CodeWriter {
         writer.println("M=-1");
         writer.println("@$FALSE_LT");
         writer.println("D;JLE");
-        writer.println("@END$");
+        writer.println("@$END_LT");
         writer.println("0;JMP");
         writer.println("($FALSE_LT)");
         writer.println("@SP");
@@ -280,6 +284,142 @@ class CodeWriter {
         writer.println("@R13");
         writer.println("A=M");
         writer.println("M=D");
+    }
+
+    void writeLabel(String label) {
+        label = currentFunName + "$" + label;
+        writer.println("(" + label + ")");
+    }
+
+    void writeGoto(String label) {
+        label = currentFunName + "$" + label;
+        writer.println("@" + label);
+        writer.println("0;JMP");
+    }
+
+    void writeIf(String label) {
+        label = currentFunName + "$" + label;
+        writer.println("@SP");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@" + label);
+        writer.println("D;JNE");
+    }
+
+    void writeCall(String funName, int nArgs) {
+        String label = "$RET$" + returnCounter;
+        int argOffset = Math.max(nArgs - 5, 0);
+        returnCounter++;
+
+        writer.println("@" + label);
+        writer.println("D=A");
+        writer.println("@SP");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
+        writer.println("M=D");
+        writer.println("@LCL");
+        writer.println("D=M");
+        writer.println("@SP");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
+        writer.println("M=D");
+        writer.println("@ARG");
+        writer.println("D=M");
+        writer.println("@SP");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
+        writer.println("M=D");
+        writer.println("@THIS");
+        writer.println("D=M");
+        writer.println("@SP");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
+        writer.println("M=D");
+        writer.println("@THAT");
+        writer.println("D=M");
+        writer.println("@SP");
+        writer.println("AM=M+1");
+        writer.println("A=A-1");
+        writer.println("M=D");
+        writer.println("@" + nArgs);
+        writer.println("D=A");
+        writer.println("@SP");
+        writer.println("D=M-D");
+        writer.println("@5");
+        writer.println("D=A");
+        writer.println("@SP");
+        writer.println("D=M-D");
+        writer.println("@ARG");
+        writer.println("M=D");
+        writer.println("@SP");
+        writer.println("D=M");
+        writer.println("@LCL");
+        writer.println("M=D");
+        writer.println("@" + funName);
+        writer.println("0;JMP");
+        writer.println("(" + label + ")");
+    }
+
+    void writeReturn() {
+        writer.println("@LCL");
+        writer.println("D=M");
+        writer.println("@R13");
+        writer.println("M=D");
+        writer.println("@5");
+        writer.println("D=A");
+        writer.println("@R13");
+        writer.println("A=M-D");
+        writer.println("D=M");
+        writer.println("@R14");
+        writer.println("M=D");
+        writer.println("@SP");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@ARG");
+        writer.println("A=M");
+        writer.println("M=D");
+        writer.println("D=A+1");
+        writer.println("@SP");
+        writer.println("M=D");
+        writer.println("@R13");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@THAT");
+        writer.println("M=D");
+        writer.println("@R13");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@THIS");
+        writer.println("M=D");
+        writer.println("@R13");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@ARG");
+        writer.println("M=D");
+        writer.println("@R13");
+        writer.println("AM=M-1");
+        writer.println("D=M");
+        writer.println("@LCL");
+        writer.println("M=D");
+        writer.println("@R14");
+        writer.println("A=M");
+        writer.println("0;JMP");
+    }
+
+    void writeFunction(String funName, int nLocals) {
+        currentFunName = funName;
+        writer.println("(" + funName + ")");
+        for (int i = 0; i < nLocals; i++) {
+            writePushPop(Parser.C_PUSH, CONSTANT, 0);
+        }
+    }
+
+    private void writeBootstrap() {
+        writer.println("@256");
+        writer.println("D=A");
+        writer.println("@SP");
+        writer.println("M=D");
+        writeCall("Sys.init", 0);
     }
 
     void close() {

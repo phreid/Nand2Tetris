@@ -13,6 +13,12 @@ class Parser {
     static final int C_ARITHMETIC = 1;
     static final int C_PUSH = 2;
     static final int C_POP = 3;
+    static final int C_LABEL = 4;
+    static final int C_GOTO = 5;
+    static final int C_IF = 6;
+    static final int C_CALL = 7;
+    static final int C_RETURN = 8;
+    static final int C_FUN = 9;
 
     static final String ADD = "add";
     static final String SUB = "sub";
@@ -26,6 +32,12 @@ class Parser {
 
     private static final String PUSH = "push";
     private static final String POP = "pop";
+    private static final String LABEL = "label";
+    private static final String GOTO = "goto";
+    private static final String IF  = "if-goto";
+    private static final String CALL = "call";
+    private static final String RETURN = "return";
+    private static final String FUN = "function";
 
     Parser(File inFile) throws IOException {
         commands = new ArrayList<>();
@@ -77,8 +89,18 @@ class Parser {
             return C_PUSH;
         } else if (first.equals(POP)) {
             return C_POP;
+        } else if (first.equals(LABEL)) {
+            return C_LABEL;
+        } else if (first.equals(GOTO)) {
+            return C_GOTO;
+        } else if (first.equals(IF)) {
+            return C_IF;
+        } else if (first.equals(CALL)) {
+            return C_CALL;
+        } else if (first.equals(RETURN)) {
+            return C_RETURN;
         } else {
-            return -1;
+            return C_FUN;
         }
     }
 
