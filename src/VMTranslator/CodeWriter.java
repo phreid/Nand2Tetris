@@ -307,7 +307,7 @@ class CodeWriter {
     }
 
     void writeCall(String funName, int nArgs) {
-        String label = "$RET$" + returnCounter;
+        String label = funName + "$RET$" + returnCounter;
         int argOffset = Math.max(nArgs - 5, 0);
         returnCounter++;
 
@@ -345,12 +345,12 @@ class CodeWriter {
         writer.println("D=A");
         writer.println("@SP");
         writer.println("D=M-D");
-        writer.println("@5");
-        writer.println("D=A");
-        writer.println("@SP");
-        writer.println("D=M-D");
         writer.println("@ARG");
         writer.println("M=D");
+        writer.println("@5");
+        writer.println("D=A");
+        writer.println("@ARG");
+        writer.println("M=M-D");
         writer.println("@SP");
         writer.println("D=M");
         writer.println("@LCL");
