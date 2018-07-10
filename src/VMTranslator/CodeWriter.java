@@ -30,6 +30,8 @@ class CodeWriter {
         writeEqSub();
         writeGtSub();
         writeLtSub();
+        writeCallSub();
+        writeReturnSub();
         writer.println("($INIT)");
         writeBootstrap();
     }
@@ -308,11 +310,25 @@ class CodeWriter {
 
     void writeCall(String funName, int nArgs) {
         String label = funName + "$RET$" + returnCounter;
-        int argOffset = Math.max(nArgs - 5, 0);
         returnCounter++;
 
+        writer.println("@" + nArgs);
+        writer.println("D=A");
+        writer.println("@R13");
+        writer.println("M=D");
+        writer.println("@" +  funName);
+        writer.println("D=A");
+        writer.println("@R14");
+        writer.println("M=D");
         writer.println("@" + label);
         writer.println("D=A");
+        writer.println("@$CALL");
+        writer.println("0;JMP");
+        writer.println("(" + label + ")");
+    }
+
+    private void writeCallSub() {
+        writer.println("($CALL)");
         writer.println("@SP");
         writer.println("AM=M+1");
         writer.println("A=A-1");
@@ -341,8 +357,8 @@ class CodeWriter {
         writer.println("AM=M+1");
         writer.println("A=A-1");
         writer.println("M=D");
-        writer.println("@" + nArgs);
-        writer.println("D=A");
+        writer.println("@R13");
+        writer.println("D=M");
         writer.println("@SP");
         writer.println("D=M-D");
         writer.println("@ARG");
@@ -355,12 +371,18 @@ class CodeWriter {
         writer.println("D=M");
         writer.println("@LCL");
         writer.println("M=D");
-        writer.println("@" + funName);
+        writer.println("@R14");
+        writer.println("A=M");
         writer.println("0;JMP");
-        writer.println("(" + label + ")");
     }
 
     void writeReturn() {
+        writer.println("@$RET");
+        writer.println("0;JMP");
+    }
+
+    private void writeReturnSub() {
+        writer.println("($RET)");
         writer.println("@LCL");
         writer.println("D=M");
         writer.println("@R13");
@@ -423,9 +445,6 @@ class CodeWriter {
     }
 
     void close() {
-        writer.println("(END)");
-        writer.println("@END");
-        writer.println("0;JMP");
         writer.close();
     }
 }
