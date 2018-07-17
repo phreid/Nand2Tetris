@@ -58,7 +58,8 @@ public class JackTokenizer {
             while (tokenMatcher.find()) {
                 String token = tokenMatcher.group();
                 if (token.equals("/*")) commentFlag = true;
-                if (! (commentFlag || token.charAt(0) == '/')) tokens.add(token);
+                if (! (commentFlag || token.startsWith("//")))
+                    tokens.add(token);
                 if (token.equals("*/")) commentFlag = false;
             }
         }
@@ -96,8 +97,8 @@ public class JackTokenizer {
         return TokenType.BAD_TOKEN;
     }
 
-    public String symbol() {
-        return curToken;
+    public char symbol() {
+        return curToken.charAt(0);
     }
 
     public String identifier() {
@@ -109,7 +110,11 @@ public class JackTokenizer {
     }
 
     public String stringVal() {
-        return curToken.substring(1, curToken.length());
+        return curToken.substring(1, curToken.length() - 1);
+    }
+
+    public String keyWord() {
+        return curToken;
     }
 
     public static void main(String[] args) throws FileNotFoundException {
