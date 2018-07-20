@@ -9,11 +9,11 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JackTokenizer {
+class JackTokenizer {
     private boolean commentFlag;
     private ArrayList<String> tokens;
     private int c;
-    private String curToken;
+    String curToken;
 
     private static final String digitRegex = "\\b\\d+\\b";
     private static final String labelRegex = "\\b[A-Za-z_][A-Za-z_\\d]*";
@@ -41,7 +41,7 @@ public class JackTokenizer {
             "var", "int", "char", "boolean", "void", "true", "false", "null",
             "this", "let", "do", "if", "else", "while", "return");
 
-    public JackTokenizer(File inFile) throws FileNotFoundException {
+    JackTokenizer(File inFile) throws FileNotFoundException {
         tokens = new ArrayList<>();
         c = 0;
         commentFlag = false;
@@ -67,15 +67,19 @@ public class JackTokenizer {
         scanner.close();
     }
 
-    public boolean hasMoreTokens() {
+    boolean hasMoreTokens() {
         return c < tokens.size();
     }
 
-    public void advance() {
+    void advance() {
         curToken = tokens.get(c++);
     }
 
-    public TokenType tokenType() {
+    String peek() {
+        return tokens.get(c);
+    }
+
+    TokenType tokenType() {
         Matcher matcher;
 
         matcher = labelPattern.matcher(curToken);
@@ -97,34 +101,23 @@ public class JackTokenizer {
         return TokenType.BAD_TOKEN;
     }
 
-    public char symbol() {
+    char symbol() {
         return curToken.charAt(0);
     }
 
-    public String identifier() {
+    String identifier() {
         return curToken;
     }
 
-    public int intVal() {
+    int intVal() {
         return Integer.parseInt(curToken);
     }
 
-    public String stringVal() {
+    String stringVal() {
         return curToken.substring(1, curToken.length() - 1);
     }
 
-    public String keyWord() {
+    String keyWord() {
         return curToken;
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        File f =  new File("test.txt");
-        JackTokenizer t = new JackTokenizer(f);
-
-        while (t.hasMoreTokens()) {
-            t.advance();
-            System.out.println(t.curToken);
-            System.out.println(t.tokenType());
-        }
     }
 }
