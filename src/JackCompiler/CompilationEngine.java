@@ -34,7 +34,19 @@ class CompilationEngine {
         switch (type) {
             case SYMBOL:
                 tag = "symbol";
-                body = Character.toString(tokenizer.symbol());
+                char c = tokenizer.symbol();
+                String s = Character.toString(c);
+
+                if (c == '<')
+                    s = "&lt;";
+                if (c == '>')
+                    s = "&gt;";
+                if (c == '"')
+                    s = "&quot;";
+                if (c == '&')
+                    s = "&amp;";
+
+                body = s;
                 break;
             case KEYWORD:
                 tag = "keyword";
@@ -218,7 +230,18 @@ class CompilationEngine {
                         tokenizer.keyWord().equals("null") || tokenizer.keyWord().equals("this"))) {
             handle(JackTokenizer.TokenType.KEYWORD);
         } else if (tokenizer.tokenType() == JackTokenizer.TokenType.IDENTIFIER) {
-            handle(JackTokenizer.TokenType.IDENTIFIER);
+            String next = tokenizer.peek();
+
+            if (next.equals(".")) {
+                handleSubCall();
+            } else if (next.equals("[")) {
+                handle(JackTokenizer.TokenType.IDENTIFIER);
+                handle(JackTokenizer.TokenType.SYMBOL);
+                compileExpression();
+                handle(JackTokenizer.TokenType.SYMBOL);
+            } else {
+                handle(JackTokenizer.TokenType.IDENTIFIER);
+            }
         } else if (tokenizer.tokenType() == JackTokenizer.TokenType.SYMBOL &&
                 tokenizer.symbol() == '(') {
             handle(JackTokenizer.TokenType.SYMBOL);
@@ -226,8 +249,7 @@ class CompilationEngine {
             handle(JackTokenizer.TokenType.SYMBOL);
         } else if (tokenizer.tokenType() == JackTokenizer.TokenType.SYMBOL &&
                 (tokenizer.symbol() == '-' || tokenizer.symbol() == '~')) {
-            writer.println("<unaryOp> " + tokenizer.keyWord() + " </unaryOp>");
-            tokenizer.advance();
+            handle(JackTokenizer.TokenType.SYMBOL);
             compileTerm();
         }
 
@@ -297,7 +319,6 @@ class CompilationEngine {
 
         while (tokenizer.symbol() != ';') {
             handle(JackTokenizer.TokenType.SYMBOL);
-
             handle(JackTokenizer.TokenType.IDENTIFIER);
         }
 
@@ -341,7 +362,6 @@ class CompilationEngine {
 
         while (tokenizer.symbol() != ';') {
             handle(JackTokenizer.TokenType.SYMBOL);
-
             handle(JackTokenizer.TokenType.IDENTIFIER);
         }
 
@@ -361,6 +381,8 @@ class CompilationEngine {
 
         c.compileClass();
         c.close();
+
+        new File("o").mkdirs();
     }
 
 }
