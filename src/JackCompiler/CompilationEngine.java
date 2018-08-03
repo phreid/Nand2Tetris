@@ -10,6 +10,7 @@ import java.util.List;
 class CompilationEngine {
     private JackTokenizer tokenizer;
     private PrintWriter writer;
+    private SymbolTable symbolTable;
 
     private final List<Character> opsList = Arrays.asList(
             '+', '-', '*', '/', '&', '|', '<', '>', '='
@@ -20,6 +21,7 @@ class CompilationEngine {
         this.tokenizer = tokenizer;
 
         writer = new PrintWriter(outFile);
+        symbolTable = new SymbolTable();
     }
 
     private void handle(JackTokenizer.TokenType type) {
@@ -72,6 +74,22 @@ class CompilationEngine {
         }
 
         tokenizer.advance();
+    }
+
+    void handleIdentifier(String cat, boolean beingDefined, boolean add) {
+        String tag = "<identifier> ";
+        String endTag = " </identifier>";
+
+        String name = tokenizer.identifier();
+        String def = beingDefined ? "defined" : "used";
+
+        String body = name + ";" + cat + ";" + def;
+        body += symbolTable.kindOf(name);
+
+        if (symbolTable.kindOf(name) != SymbolTable.Kind.NONE)
+            body += ";" + symbolTable.indexOf(name);
+
+        writer.println(tag + body + endTag);
     }
 
     void compileClass() {
