@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class JackCompiler {
-    public static void compile(File inFile) throws FileNotFoundException {
+    public static void compile(File inFile, boolean debug) throws FileNotFoundException {
         ArrayList<File> toTranslate = new ArrayList<>();
         String outPath = inFile.getAbsolutePath() + "\\o\\";
 
@@ -36,7 +36,7 @@ public class JackCompiler {
             JackTokenizer tk = new JackTokenizer(f);
             CompilationEngine ce = new CompilationEngine(tk, outFile);
 
-            ce.setDebug(true);
+            ce.setDebug(debug);
             ce.compileClass();
             ce.close();
         }
@@ -45,7 +45,9 @@ public class JackCompiler {
     public static void main(String[] args) throws FileNotFoundException {
         File inFile = new File(args[0]);
 
-        //File inFile = new File("Array.jack");
-        compile(inFile);
+        if (args.length == 2 && args[1].equals("debug"))
+            compile(inFile, true);
+        else
+            compile(inFile, false);
     }
 }
