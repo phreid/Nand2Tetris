@@ -5,16 +5,17 @@ import java.util.Map;
 
 public class SymbolTable {
     private Map<String, Identifier> classTable, subroutineTable;
-    private int staticCount, fieldCount, argCount, varCount = 0;
+    private int staticCount, fieldCount, argCount, varCount;
+    static int INDEX_NOT_FOUND = -1;
 
-    enum Kind {STATIC, FIELD, ARG, VAR, NONE};
+    enum Kind {STATIC, FIELD, ARG, VAR, NONE}
 
     private class Identifier {
         private String type;
-        private Kind kind;
+        private String kind;
         private int index;
 
-        private Identifier(String type, Kind kind, int index) {
+        private Identifier(String type, String kind, int index) {
             this.type = type;
             this.kind = kind;
             this.index = index;
@@ -31,52 +32,52 @@ public class SymbolTable {
         argCount = varCount = 0;
     }
 
-    void define(String name, String type, Kind kind) {
+    void define(String name, String type, String kind) {
         switch (kind) {
-            case STATIC:
+            case "static":
                 classTable.put(name, new Identifier(
                         type, kind, staticCount++
                 ));
                 break;
-            case FIELD:
+            case "field":
                 classTable.put(name, new Identifier(
                         type, kind, fieldCount++
                 ));
                 break;
-            case ARG:
+            case "argument":
                 subroutineTable.put(name, new Identifier(
                         type, kind, argCount++
                 ));
                 break;
-            case VAR:
+            case "var":
                 subroutineTable.put(name, new Identifier(
                         type, kind, varCount++
                 ));
         }
     }
 
-    int varCount(Kind kind) {
+    int varCount(String kind) {
         switch (kind) {
-            case STATIC:
+            case "static":
                 return staticCount;
-            case FIELD:
+            case "field":
                 return fieldCount;
-            case ARG:
+            case "argument":
                 return argCount;
-            case VAR:
+            case "var":
                 return varCount;
         }
 
         return -1;
     }
 
-    Kind kindOf(String name) {
+    String kindOf(String name) {
         Identifier identifier = subroutineTable.get(name);
         if (identifier == null)
             identifier = classTable.get(name);
 
         if (identifier == null)
-            return Kind.NONE;
+            return "none";
 
         return identifier.kind;
     }
@@ -98,7 +99,7 @@ public class SymbolTable {
             identifier = classTable.get(name);
 
         if (identifier == null)
-            return -1;
+            return INDEX_NOT_FOUND;
 
         return identifier.index;
     }

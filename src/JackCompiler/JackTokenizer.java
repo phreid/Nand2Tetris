@@ -67,6 +67,23 @@ class JackTokenizer {
         scanner.close();
     }
 
+    JackTokenizer(String line) {
+        tokens = new ArrayList<>();
+        c = 0;
+        commentFlag = false;
+
+        Matcher tokenMatcher = allPattern.matcher("");
+
+        tokenMatcher.reset(line);
+        while (tokenMatcher.find()) {
+            String token = tokenMatcher.group();
+            if (token.equals("/*")) commentFlag = true;
+            if (! (commentFlag || token.startsWith("//")))
+                tokens.add(token);
+            if (token.equals("*/")) commentFlag = false;
+        }
+    }
+
     boolean hasMoreTokens() {
         return c < tokens.size();
     }
